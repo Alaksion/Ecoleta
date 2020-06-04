@@ -1,8 +1,13 @@
 import express from 'express'
 const app = express()
+import router from './routes'
+import path from 'path'
+import cors from 'cors'
 
-app.get('/teste', (req, res)=>{
-    res.json({msg:'Bom dia primo 2'}).send()
-})
+app.use(express.json())
+app.use(router)
+app.use(cors())
 
-module.exports = app
+app.use('/uploads', express.static(path.resolve(__dirname, '..', 'uploads' )))
+
+export default  app
