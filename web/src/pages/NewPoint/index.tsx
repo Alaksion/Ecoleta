@@ -1,7 +1,7 @@
-import React, {useEffect, useState, ChangeEvent} from 'react'
+import React, {useEffect, useState, ChangeEvent, FormEvent} from 'react'
 import './styles.css'
 import logo from '../../assets/logo.svg'
-import {Link} from 'react-router-dom'
+import {Link, useHistory} from 'react-router-dom'
 import {FiArrowLeft} from 'react-icons/fi'
 import {Map, TileLayer, Marker} from 'react-leaflet'
 import api from '../../services/api'
@@ -10,6 +10,7 @@ import {LeafletMouseEvent} from 'leaflet'
 
 const CreatePoint = ()=>{
     //sempre ao criar um array ou objeto em um estado deve ser criado um tipo de dado para o que for inserido
+     const history = useHistory()
 
     interface Item{
         image_url:string,
@@ -36,6 +37,61 @@ const CreatePoint = ()=>{
     const [selectedposition, setSelectedPosition] = useState<[number, number]>([0, 0])
     const [userPosition, setUserPosition] = useState<[number, number]>([0, 0])
 
+    const [name, setName] = useState("")
+    const [email, setEmail] = useState("")
+    const [whatsapp, setWhatsapp] = useState("")
+
+    const[Selecteditems, setSelectedItems] = useState<Array<number>>([])
+
+    async function handleSubmit(event: FormEvent){
+        event.preventDefault()
+        
+        await api.post('http://localhost:8081/points', {
+            name: name,
+            city: selectedcity,
+            uf: selectedUf,
+            whatsapp: whatsapp,
+            email: email,
+            latitude: selectedposition[0],
+            longitude: selectedposition[1],
+            items: Selecteditems
+        })
+        alert("Ponto de coleta criado com sucesso")
+        history.push('/')
+
+        
+    }
+
+    function handleEmail(event: ChangeEvent<HTMLInputElement>){
+        let email = event.target.value
+        setEmail(email)
+        console.log(email)
+    }
+
+    function handleSelectItem(id:number){
+        const isSelected = Selecteditems.findIndex(item => item ===id)
+        
+        if (isSelected >= 0){
+            const filteredItems = Selecteditems.filter(item => item !== id)
+            setSelectedItems(filteredItems)
+        }
+        else{
+            setSelectedItems([...Selecteditems, id])
+        }
+        
+    }
+
+    function HandleName(event: ChangeEvent<HTMLInputElement>){
+        let name= event.target.value
+        setName(name)
+        console.log(name)
+    }
+
+    function HandleWhatsapp(event: ChangeEvent<HTMLInputElement>){
+        let whatsapp = event.target.value
+        setWhatsapp(whatsapp)
+        console.log(whatsapp)
+    }
 
     function HandleSelectedUf(event: ChangeEvent<HTMLSelectElement> ){
        let selected = event.target.value
@@ -58,7 +114,6 @@ const CreatePoint = ()=>{
     useEffect(()=>{
         api.get('items').then((res)=>{
             setItems(res.data)
-            console.log(res)
         })
 
     }, [])
@@ -95,7 +150,7 @@ const CreatePoint = ()=>{
                 <Link to='/'> <FiArrowLeft></FiArrowLeft> Página Principal</Link>
             </header>
 
-            <form>
+            <form onSubmit={handleSubmit}>
                 <h1>Cadastro do <br></br> ponto de coleta</h1>
                 <fieldset>
                     <legend>
@@ -107,7 +162,9 @@ const CreatePoint = ()=>{
                             type="text"
                             id="name"
                             name="name"
-                            placeholder="Exemplo">
+                            placeholder="Exemplo"
+                            value={name}
+                            onChange={HandleName}>
                         </input>
                     </div>
 
@@ -118,7 +175,9 @@ const CreatePoint = ()=>{
                                 type="text"
                                 id="whatsapp"
                                 name="whatsapp"
-                                placeholder="51999999999">
+                                placeholder="51999999999"
+                                value ={whatsapp}
+                                onChange={HandleWhatsapp}>
                             </input>
                         </div>
                         <div className="field">
@@ -127,7 +186,9 @@ const CreatePoint = ()=>{
                                 type="email"
                                 id="email"
                                 name="email"
-                                placeholder="exemplo@exemplomail.com">
+                                placeholder="exemplo@exemplomail.com"
+                                value={email}
+                                onChange={handleEmail}>
                             </input>
                         </div>
 
@@ -191,7 +252,9 @@ const CreatePoint = ()=>{
                     <ul className="items-grid">
                         {items.map(item=>{
                             return(
-                                <li key={item.id}>
+                                <li key={item.id} 
+                                    onClick={() => handleSelectItem(item.id)} 
+                                    className={ Selecteditems.includes(item.id)? "selected": ""}>
                                     <img src={item.image_url} alt={item.name}></img>
                                     <span>{item.name}</span>
                                 </li>

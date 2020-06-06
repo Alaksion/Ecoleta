@@ -48,7 +48,7 @@ class PointController{
 
         const items = await connection('items')
             .join('point_items', 'items.id','=' ,'point_items.item_id')
-            .where('point_items.point_id' , point_id)
+            .where('point_items.point_id' , point_id).select(['items.name', ])
 
         return res.json({point, items})
     }
@@ -57,6 +57,7 @@ class PointController{
         const {city, uf, items} = req.query
 
         const parsedItems = String(items).split(",").map(item=> Number(item.trim()))
+
         const points = await connection('points')
         .join('point_items', 'point_items.point_id', '=', 'points.id')
         .whereIn('point_items.item_id', parsedItems)
