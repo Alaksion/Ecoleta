@@ -21,6 +21,7 @@ export default function Points(){
         longitude : number,
         latitude : number,
         image: string,
+        image_url: string,
     }
 
     interface Items{
@@ -117,33 +118,20 @@ export default function Points(){
                         loadingEnabled={initalPosition[0] === 0}>
                             {
                                 points.map(point =>(
-                                    <Marker
+                                        <Marker
                                         coordinate={{
                                             longitude: point.longitude,
                                             latitude: point.latitude
                                         }}
                                         onPress={() => (HandleNavigation_Detail(point.id))}
                                         key={String(point.id)}>
-                                        <View style={styles.mapContainer}>
-                                            <Image style={styles.mapMarkerImage} source={{uri: point.image}}></Image>
-                                            <Text style={styles.mapMarkerTitle}> {point.name}</Text>
-                                        </View>
+                                            <View style={styles.mapMarkerContainer}>
+                                                <Image style={styles.mapMarkerImage} source={{uri: point.image_url}}></Image>
+                                                <Text style={styles.mapMarkerTitle}> {point.name}</Text>
+                                            </View>
                                     </Marker>
                                 ))
                             }
-
-                                 <Marker
-                                           coordinate={{
-                                            longitude: -57.00,
-                                            latitude: -21.00
-                                        }}
-                                        onPress={() => (HandleNavigation_Detail(12))}
-                                        key={String(12)}>
-                                        <View style={styles.mapContainer}>
-                                            <Image style={styles.mapMarkerImage} source={{uri: "https://images.unsplash.com/photo-1542838132-92c53300491e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=400&q=60"}}></Image>
-                                            <Text style={styles.mapMarkerTitle}> NOME</Text>
-                                        </View>
-                                    </Marker>
                     </Mapview>
                 </View>) }
 

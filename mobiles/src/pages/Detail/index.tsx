@@ -16,13 +16,14 @@ export default function Detail(){
     }
 
    interface Data{
-        point: {
+        serialiazedPoint: {
             image: string, 
             name: string, 
             whatsapp: string,
             email:string,
             city: string,
             uf: string,
+            image_url: string,
         },
         items:{
             name: string,
@@ -32,12 +33,13 @@ export default function Detail(){
     const navigation = useNavigation()
     const route = useRoute() // capturando os parametros da rota anterior
     const routeParams = route.params as Params // afirmando que os parametros da pagina anterior tem o formato especificado
-    const [Data, SetPoint] = useState<Data>({} as Data)
+    const [Data, SetData] = useState<Data>({} as Data)
 
     useEffect(()=> {
         const point_id = routeParams.point_id
         api.get(`/points/${point_id}`).then(point =>{
-            SetPoint(point.data)
+            console.log(point.data)
+            SetData(point.data)
         })
     }, [])
 
@@ -48,12 +50,12 @@ export default function Detail(){
     function handleMailComposer(){
         MailComposer.composeAsync({
             subject: "Interesse na coleta de resíduos",
-            recipients: [Data.point.email],
+            recipients: [Data.serialiazedPoint.email],
         })
     }
 
     function handleWhatsapp(){
-        Linking.openURL(`whatsapp://send?phone=${Data.point.whatsapp}&text= Olá! Tenho interesse em fazer descartes no seu ponto de coleta`)
+        Linking.openURL(`whatsapp://send?phone=${Data.serialiazedPoint.whatsapp}&text= Olá! Tenho interesse em fazer descartes no seu ponto de coleta`)
 
     }
 
@@ -68,27 +70,27 @@ export default function Detail(){
                 <TouchableOpacity onPress={handleNavigateBack}>
                     <Feather name={"arrow-left"} size={20} color="#34cb79"></Feather>
                 </TouchableOpacity>
-                <Image style={styles.pointImage} source={{uri: "https://images.unsplash.com/photo-1542838132-92c53300491e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=400&q=60"}}></Image>
+                <Image style={styles.pointImage} source={{uri: Data.serialiazedPoint.image_url}}></Image>
 
-                <Text style={styles.pointName}>{Data.point.name}</Text>
-                <Text style={styles.pointItems}>{Data.items.map(item=>(item.name)).join(", ")}</Text>
+                <Text style={styles.pointName}>{Data.serialiazedPoint.name}</Text>
+                <Text style={styles.pointItems}>{Data.items.map(item=> item.name).join(", ") }</Text>
 
                 <View style={styles.address}>
                     <Text style={styles.addressTitle}>Endereço</Text>
-                    <Text style={styles.addressContent}>{`${Data.point.city}, ${Data.point.uf}`}</Text>
+                    <Text style={styles.addressContent}>{`${Data.serialiazedPoint.city}, ${Data.serialiazedPoint.uf}`}</Text>
                 </View>
                 
             </View>
 
             <View style={styles.footer}>
-                <RectButton style={styles.button}>
+                <RectButton style={styles.button} onPress={handleWhatsapp}>
                     <FontAwesome name="whatsapp" size={30} color="#fff"></FontAwesome>
                     <Text style={styles.buttonText}> Whatsapp</Text>
                 </RectButton>
 
                 <RectButton style={styles.button} onPress={handleMailComposer}>
                     <Feather name="mail" size={30} color="#fff"></Feather>
-                    <Text style={styles.buttonText}> Whatsapp</Text>
+                    <Text style={styles.buttonText}> Email</Text>
                 </RectButton>
                 
             </View>

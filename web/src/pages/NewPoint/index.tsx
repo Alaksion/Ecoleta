@@ -7,6 +7,9 @@ import {Map, TileLayer, Marker} from 'react-leaflet'
 import api from '../../services/api'
 import axios from 'axios'
 import {LeafletMouseEvent} from 'leaflet'
+import Dropzone from '../../components/dropzone/index'
+
+
 
 const CreatePoint = ()=>{
     //sempre ao criar um array ou objeto em um estado deve ser criado um tipo de dado para o que for inserido
@@ -37,6 +40,8 @@ const CreatePoint = ()=>{
     const [selectedposition, setSelectedPosition] = useState<[number, number]>([0, 0])
     const [userPosition, setUserPosition] = useState<[number, number]>([0, 0])
 
+    
+    const [file, setFile] = useState<File>()
     const [name, setName] = useState("")
     const [email, setEmail] = useState("")
     const [whatsapp, setWhatsapp] = useState("")
@@ -45,21 +50,29 @@ const CreatePoint = ()=>{
 
     async function handleSubmit(event: FormEvent){
         event.preventDefault()
-        
-        await api.post('http://localhost:8081/points', {
-            name: name,
-            city: selectedcity,
-            uf: selectedUf,
-            whatsapp: whatsapp,
-            email: email,
-            latitude: selectedposition[0],
-            longitude: selectedposition[1],
-            items: Selecteditems
-        })
+
+        const uf = selectedUf
+        const city = selectedcity
+        const [latitude, longitude] = selectedposition
+        const items = Selecteditems
+
+        const data = new FormData()
+
+        data.append('name', name) 
+        data.append('email', email) 
+        data.append('whatsapp', whatsapp) 
+        data.append('uf', uf) 
+        data.append('city', city) 
+        data.append('latitude', String(latitude)) 
+        data.append('longitude', String(longitude)) 
+        data.append('items', items.join(',')) 
+        if(file){
+            data.append('image', file)
+        }
+
+        await api.post('http://localhost:8081/points', data)
         alert("Ponto de coleta criado com sucesso")
         history.push('/')
-
-        
     }
 
     function handleEmail(event: ChangeEvent<HTMLInputElement>){
@@ -152,6 +165,7 @@ const CreatePoint = ()=>{
 
             <form onSubmit={handleSubmit}>
                 <h1>Cadastro do <br></br> ponto de coleta</h1>
+                <Dropzone onFileUpload={setFile} ></Dropzone>
                 <fieldset>
                     <legend>
                         <h2>Dados</h2>
